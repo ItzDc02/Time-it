@@ -1,7 +1,8 @@
+// src/app/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import capsuleReducer from "../Features/Capsule/capsuleSlice";
 
-export const store = configureStore({
+const store = configureStore({
   reducer: {
     capsule: capsuleReducer,
   },
@@ -9,3 +10,5 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+export default store;
