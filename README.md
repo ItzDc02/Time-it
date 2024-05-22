@@ -21,7 +21,7 @@ This project is a virtual time capsule built with React and TypeScript, using Re
 - npm (>= 6.x) or yarn (>= 1.22.x)
 
 ## Tasks Done (Tasks to be Added as they are Completed)
-- Basic Layout on Local ✅
+- Basic Layout and Functionality on Local ✅
 
 ### Installation
 
