@@ -52,6 +52,7 @@ const capsuleSlice = createSlice({
       state.capsules = action.payload;
     },
   },
+  //@ts-ignore
   extraReducers: (builder) => {
     // builder.addCase(fetchCapsules.fulfilled, (state, action) => {
     //   // This is handled by dispatching setCapsules inside the thunk
