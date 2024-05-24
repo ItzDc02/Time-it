@@ -22,6 +22,7 @@ This project is a virtual time capsule built with React and TypeScript, using Re
 
 ## Tasks Done (Tasks to be Added as they are Completed)
 - Basic Layout and Functionality on Local ✅
+- Tailwind and Capsules Persist After Reload ✅
 
 ### Installation
 
