@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { v4 as uuidv4 } from "uuid";
 import { addCapsule } from "../Features/Capsule/capsuleSlice";
 import { useNavigate } from "react-router-dom";
+import { db } from "../firebaseConfig";
+import { collection, addDoc } from "firebase/firestore";
 
 interface FormValues {
   title: string;
@@ -15,7 +17,7 @@ interface FormValues {
 const createCapsuleForm: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [confirmation, setConfirmation] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const validationSchema = Yup.object({
     title: Yup.string().required("Title is required"),
@@ -25,42 +27,47 @@ const createCapsuleForm: React.FC = () => {
     message: Yup.string().required("Message is required"),
   });
 
-  const handleSubmit = (values: FormValues) => {
-    dispatch(addCapsule({ id: uuidv4(), ...values }));
-    setConfirmation(true);
-    sessionStorage.setItem("capsuleCreated", "true");
-    setTimeout(() => {
-      navigate("/");
-    }, 3000); // Redirect after 3 seconds
+  const handleSubmit = async (
+    values: FormValues,
+    { setSubmitting }: FormikHelpers<FormValues>
+  ) => {
+    const newCapsule = { id: uuidv4(), ...values };
+    dispatch(addCapsule(newCapsule));
+    try {
+      await addDoc(collection(db, "capsules"), newCapsule);
+      setSubmitted(true); // Set submitted state to true
+      setTimeout(() => {
+        navigate("/"); // Delay navigation to home page
+      }, 3000); // Wait for 3 seconds
+    } catch (error) {
+      console.error("Failed to create capsule:", error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const today = new Date().toISOString().split("T")[0];
-
-  if (confirmation) {
+  if (submitted) {
     return (
-      <div className="text-center p-6">
-        <h2 className="text-2xl font-bold mb-4">
-          Capsule Created Successfully!
-        </h2>
-        <p className="text-gray-700">
-          You will be redirected to the home page shortly...
-        </p>
+      <div className="text-center text-2xl font-bold">
+        Capsule Created Successfully! Redirecting to home...
       </div>
     );
   }
+
+  const today = new Date().toISOString().split("T")[0]; // Set today's date as the minimum for the date picker
 
   return (
     <Formik
       initialValues={{
         title: "",
-        date: "",
+        date: today,
         message: "",
       }}
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
       {({ isSubmitting }) => (
-        <Form className="flex flex-col space-y-4 p-4">
+        <Form>
           <div>
             <label
               htmlFor="title"
@@ -119,7 +126,7 @@ const createCapsuleForm: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 mt-4"
           >
             Create Capsule
           </button>
