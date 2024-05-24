@@ -1,4 +1,4 @@
-This README file provides an overview of your project, installation instructions, and other relevant information. Feel free to customize it further based on your project's specific requirements and features.
+This README file provides an overview of the project, installation instructions, and other relevant information.
 
 # Virtual Time Capsule
 
