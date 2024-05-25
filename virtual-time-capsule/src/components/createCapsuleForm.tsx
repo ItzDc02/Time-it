@@ -7,6 +7,7 @@ import { addCapsule } from "../Features/Capsule/capsuleSlice";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
+import { addDays } from "date-fns";
 
 interface FormValues {
   title: string;
@@ -23,7 +24,7 @@ const CreateCapsuleForm: React.FC = () => {
     title: Yup.string().required("Title is required"),
     date: Yup.date()
       .required("Date is required")
-      .min(new Date(), "Date cannot be in the past"),
+      .min(addDays(new Date(), 1), "Date cannot be today or in the past"), // Modify this line
     message: Yup.string().required("Message is required"),
   });
 
@@ -54,8 +55,6 @@ const CreateCapsuleForm: React.FC = () => {
     );
   }
 
-  const today = new Date().toISOString().split("T")[0];
-
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-200">
       <div className="p-10 bg-white shadow-xl rounded-xl w-full max-w-4xl">
@@ -83,7 +82,7 @@ const CreateCapsuleForm: React.FC = () => {
           Create a New Capsule
         </h2>
         <Formik
-          initialValues={{ title: "", date: today, message: "" }}
+          initialValues={{ title: "", date: "", message: "" }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
@@ -99,6 +98,7 @@ const CreateCapsuleForm: React.FC = () => {
                 <Field
                   type="text"
                   name="title"
+                  placeholder="Enter the title"
                   className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <ErrorMessage
@@ -117,7 +117,8 @@ const CreateCapsuleForm: React.FC = () => {
                 <Field
                   type="date"
                   name="date"
-                  min={today}
+                  placeholder="Select a date"
+                  min={addDays(new Date(), 1).toISOString().split("T")[0]}
                   className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <ErrorMessage
@@ -136,6 +137,7 @@ const CreateCapsuleForm: React.FC = () => {
                 <Field
                   as="textarea"
                   name="message"
+                  placeholder="Write your message"
                   className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <ErrorMessage
