@@ -17,11 +17,9 @@ const initialState: CapsuleState = {
   capsules: [],
 };
 
-// Updated Async thunk for fetching capsules from Firestore
 export const fetchCapsules = createAsyncThunk(
   "capsule/fetchCapsules",
-  async (userUid: string, thunkAPI) => {
-    // Now accepts a userUid parameter
+  async (userUid: string) => {
     if (!userUid) {
       console.log("fetchCapsules: No user UID provided");
       return [];

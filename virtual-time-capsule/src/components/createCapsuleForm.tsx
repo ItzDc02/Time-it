@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import { v4 as uuidv4 } from "uuid";
 import { addCapsule } from "../Features/Capsule/capsuleSlice";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebaseConfig";
@@ -25,7 +24,7 @@ const CreateCapsuleForm: React.FC = () => {
     title: Yup.string().required("Title is required"),
     date: Yup.date()
       .required("Date is required")
-      .min(addDays(new Date(), 1), "Date cannot be today or in the past"), // Modify this line
+      .min(addDays(new Date(), 1), "Date cannot be today or in the past"),
     message: Yup.string().required("Message is required"),
   });
 
@@ -37,14 +36,18 @@ const CreateCapsuleForm: React.FC = () => {
     const user = auth.currentUser;
     if (!user) {
       console.error("No user logged in");
+      setSubmitting(false);
       return;
     }
 
     const newCapsule = { ...values };
     try {
       await addDoc(collection(db, "users", user.uid, "capsules"), newCapsule);
-      dispatch(addCapsule({ id: user.uid, ...newCapsule })); // Adjust based on how you manage state
-      navigate("/"); // Ensure this happens after the async operation
+      dispatch(addCapsule({ id: user.uid, ...newCapsule }));
+      setSubmitted(true);
+      setTimeout(() => {
+        navigate("/");
+      }, 3000); // Redirect after 3 seconds
     } catch (error) {
       console.error("Failed to create capsule:", error);
     } finally {

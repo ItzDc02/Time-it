@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { User } from "firebase/auth"; // Importing the User type from Firebase for reference only
 
 interface SerializableUser {
   uid: string | null;
