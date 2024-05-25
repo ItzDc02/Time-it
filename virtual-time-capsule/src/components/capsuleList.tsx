@@ -8,14 +8,20 @@ import { db } from "../firebaseConfig";
 
 const CapsuleList: React.FC = () => {
   const capsules = useSelector((state: RootState) => state.capsule.capsules);
+  const userUid = useSelector((state: RootState) => state.user.uid); // Using UID from Redux
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [unlockedCapsules, setUnlockedCapsules] = useState<string[]>([]);
 
   // Fetch capsules on component mount
   useEffect(() => {
-    dispatch(fetchCapsules());
-  }, [dispatch]);
+    if (userUid) {
+      // Check if user UID is available
+      dispatch(fetchCapsules(userUid)); // Pass UID to your fetchCapsules action
+    } else {
+      console.log("No user logged in");
+    }
+  }, [dispatch, userUid]); // Depend on userUid to re-fetch when it changes
 
   // Redirect when capsule list is empty
   useEffect(() => {
@@ -26,10 +32,15 @@ const CapsuleList: React.FC = () => {
   }, [capsules, navigate]);
 
   const handleRemove = async (id: string) => {
+    if (!userUid) {
+      // Check if user UID is available
+      console.error("User not authenticated");
+      return;
+    }
+
     try {
-      await deleteDoc(doc(db, "capsules", id));
+      await deleteDoc(doc(db, "users", userUid, "capsules", id)); // Use userUid in path
       dispatch(removeCapsule(id));
-      dispatch(fetchCapsules());
     } catch (error) {
       console.error("Failed to delete capsule:", error);
     }

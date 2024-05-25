@@ -1,9 +1,11 @@
 // src/app/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import capsuleReducer from "../Features/Capsule/capsuleSlice";
+import userReducer from "../Features/Users/userSlice";
 
 const store = configureStore({
   reducer: {
+    user: userReducer,
     capsule: capsuleReducer,
   },
 });

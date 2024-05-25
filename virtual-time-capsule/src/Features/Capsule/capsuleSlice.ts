@@ -17,22 +17,32 @@ const initialState: CapsuleState = {
   capsules: [],
 };
 
-// Async thunk for fetching capsules from Firestore
+// Updated Async thunk for fetching capsules from Firestore
 export const fetchCapsules = createAsyncThunk(
   "capsule/fetchCapsules",
-  async (_, { dispatch }) => {
-    const querySnapshot = await getDocs(collection(db, "capsules"));
+  async (userUid: string, thunkAPI) => {
+    // Now accepts a userUid parameter
+    if (!userUid) {
+      console.log("fetchCapsules: No user UID provided");
+      return [];
+    }
+
+    console.log("Fetching capsules for user:", userUid);
+    const querySnapshot = await getDocs(
+      collection(db, "users", userUid, "capsules")
+    );
     const capsules = querySnapshot.docs.map((doc) => {
       const data = doc.data();
-      // Ensure that data contains all the properties expected by the Capsule interface
+      console.log("Capsule data:", data);
       return {
         id: doc.id,
-        title: data.title || "Default Title", // Provide default values or handle missing data appropriately
+        title: data.title || "Default Title",
         date: data.date || "No Date",
         message: data.message || "No Message",
       };
     });
-    dispatch(setCapsules(capsules));
+
+    return capsules;
   }
 );
 
@@ -52,11 +62,11 @@ const capsuleSlice = createSlice({
       state.capsules = action.payload;
     },
   },
-  //@ts-ignore
   extraReducers: (builder) => {
-    // builder.addCase(fetchCapsules.fulfilled, (state, action) => {
-    //   // This is handled by dispatching setCapsules inside the thunk
-    // });
+    builder.addCase(fetchCapsules.fulfilled, (state, action) => {
+      console.log("Capsules fetched and setting state", action.payload);
+      state.capsules = action.payload;
+    });
   },
 });
 

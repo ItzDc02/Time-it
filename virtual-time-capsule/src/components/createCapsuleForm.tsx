@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { db } from "../firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { addDays } from "date-fns";
+import { getAuth } from "firebase/auth";
 
 interface FormValues {
   title: string;
@@ -32,12 +33,18 @@ const CreateCapsuleForm: React.FC = () => {
     values: FormValues,
     { setSubmitting }: FormikHelpers<FormValues>
   ) => {
-    const newCapsule = { id: uuidv4(), ...values };
-    dispatch(addCapsule(newCapsule));
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      console.error("No user logged in");
+      return;
+    }
+
+    const newCapsule = { ...values };
     try {
-      await addDoc(collection(db, "capsules"), newCapsule);
-      setSubmitted(true);
-      setTimeout(() => navigate("/"), 3000);
+      await addDoc(collection(db, "users", user.uid, "capsules"), newCapsule);
+      dispatch(addCapsule({ id: user.uid, ...newCapsule })); // Adjust based on how you manage state
+      navigate("/"); // Ensure this happens after the async operation
     } catch (error) {
       console.error("Failed to create capsule:", error);
     } finally {
