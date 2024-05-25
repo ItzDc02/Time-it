@@ -12,6 +12,7 @@ This project is a virtual time capsule built with React and TypeScript, using Re
 - **Form Handling:** Formik is used for handling form inputs.
 - **Date Handling:** date-fns is used for manipulating and formatting dates.
 - **CSS Styling:** CSS is used for styling components.
+- **User Authentication and Database Storage:** FireBase is being used for User Auth and The Data is being stored in Firestore
 
 ## Getting Started
 
