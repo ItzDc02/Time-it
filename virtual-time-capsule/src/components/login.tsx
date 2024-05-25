@@ -6,6 +6,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { useDispatch } from "react-redux";
 import { setUser } from "../Features/Users/userSlice"; // Adjust path as necessary
+import "@fortawesome/fontawesome-free/css/all.min.css"; // Import Font Awesome CSS
 
 const Login: React.FC = () => {
   const auth = getAuth();
@@ -36,14 +37,18 @@ const Login: React.FC = () => {
   }, [user, navigate]);
 
   return (
-    <div className="text-center p-6">
-      <h1 className="text-4xl font-bold mb-6">Login</h1>
-      <button
-        onClick={handleLogin}
-        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-      >
-        Sign in with Google
-      </button>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-400 to-purple-600">
+      <div className="bg-white p-10 rounded-lg shadow-lg text-center w-full max-w-md">
+        <h1 className="text-5xl font-bold mb-6 text-gray-800">Welcome Back!</h1>
+        <p className="text-gray-600 mb-8">Please sign in to continue</p>
+        <button
+          onClick={handleLogin}
+          className="bg-red-600 text-white py-3 px-6 rounded-full flex items-center justify-center w-full text-lg font-semibold hover:bg-red-700 transition duration-300"
+        >
+          <i className="fab fa-google text-2xl mr-3"></i>
+          Sign in with Google
+        </button>
+      </div>
     </div>
   );
 };
