@@ -2,7 +2,7 @@ This README file provides an overview of the project, installation instructions,
 
 # Virtual Time Capsule
 
-This project is a virtual time capsule built with React and TypeScript, using Redux for state management and CSS for styling. Users can create and view time capsules, which include titles, dates, and messages.
+This project is a virtual time capsule built with React and TypeScript, using Redux for state management and Tailwind for styling. Users can create and view time capsules, which include titles, dates, and messages.
 
 ## Features
 
@@ -11,7 +11,7 @@ This project is a virtual time capsule built with React and TypeScript, using Re
 - **State Management:** Redux is used for managing the application state.
 - **Form Handling:** Formik is used for handling form inputs.
 - **Date Handling:** date-fns is used for manipulating and formatting dates.
-- **CSS Styling:** CSS is used for styling components.
+- **Tailwind Styling:** Tailwind is used for styling components.
 - **User Authentication and Database Storage:** FireBase is being used for User Auth and The Data is being stored in Firestore
 
 ## Getting Started
