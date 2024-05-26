@@ -117,7 +117,7 @@ const CreateCapsuleForm: React.FC = () => {
           Back
         </button>
         <h2 className="text-3xl font-bold text-center mb-6">
-          Create Your New Capsule!!
+          Create a New Memory ♥
         </h2>
         <Formik
           initialValues={{ title: "", date: "", message: "" }}

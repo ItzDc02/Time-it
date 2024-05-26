@@ -75,7 +75,7 @@ const CapsuleList: React.FC = () => {
             <span className="mr-2">Back</span>
           </button>
           <h2 className="text-3xl font-bold text-gray-800 text-center w-full">
-            Your Capsules Are Buried Here!!
+            Your Memories rest here ♥
           </h2>
           <div></div>
         </div>
