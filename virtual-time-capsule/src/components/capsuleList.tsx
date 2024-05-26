@@ -8,38 +8,38 @@ import { db } from "../firebaseConfig";
 
 const CapsuleList: React.FC = () => {
   const capsules = useSelector((state: RootState) => state.capsule.capsules);
-  const userUid = useSelector((state: RootState) => state.user.uid); // Using UID from Redux
+  const userUid = useSelector((state: RootState) => state.user.uid);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [unlockedCapsules, setUnlockedCapsules] = useState<string[]>([]);
+  const [showModal, setShowModal] = useState(false);
 
-  // Fetch capsules on component mount
   useEffect(() => {
     if (userUid) {
-      // Check if user UID is available
-      dispatch(fetchCapsules(userUid)); // Pass UID to your fetchCapsules action
+      dispatch(fetchCapsules(userUid));
     } else {
       console.log("No user logged in");
     }
-  }, [dispatch, userUid]); // Depend on userUid to re-fetch when it changes
+  }, [dispatch, userUid]);
 
-  // Redirect when capsule list is empty
   useEffect(() => {
     if (capsules.length === 0) {
-      const timeout = setTimeout(() => navigate("/"), 3000);
+      setShowModal(true);
+      const timeout = setTimeout(() => {
+        setShowModal(false);
+        navigate("/");
+      }, 3000);
       return () => clearTimeout(timeout);
     }
   }, [capsules, navigate]);
 
   const handleRemove = async (id: string) => {
     if (!userUid) {
-      // Check if user UID is available
       console.error("User not authenticated");
       return;
     }
-
     try {
-      await deleteDoc(doc(db, "users", userUid, "capsules", id)); // Use userUid in path
+      await deleteDoc(doc(db, "users", userUid, "capsules", id));
       dispatch(removeCapsule(id));
     } catch (error) {
       console.error("Failed to delete capsule:", error);
@@ -51,37 +51,103 @@ const CapsuleList: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Capsule List</h2>
-      {capsules.length === 0 && (
-        <p className="text-center text-gray-700">
-          No capsules available. Redirecting to home...
-        </p>
-      )}
-      <ul className="space-y-4">
-        {capsules.map((capsule) => (
-          <li key={capsule.id} className="border p-4 rounded-md">
-            <h3 className="text-xl font-semibold">{capsule.title}</h3>
-            <p className="text-gray-600">{capsule.date}</p>
-            {unlockedCapsules.includes(capsule.id) ? (
-              <p className="mt-2">{capsule.message}</p>
-            ) : (
-              <button
-                onClick={() => handleUnlock(capsule.id)}
-                className="mt-2 bg-green-500 text-white py-1 px-3 rounded hover:bg-green-700"
-              >
-                Unlock Now
-              </button>
-            )}
-            <button
-              onClick={() => handleRemove(capsule.id)}
-              className="mt-2 ml-4 bg-red-500 text-white py-1 px-3 rounded hover:bg-red-700"
+    <div className="relative p-6 bg-gradient-to-r from-blue-100 to-purple-100 min-h-screen flex flex-col items-center">
+      <div className="w-full max-w-3xl">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => navigate("/")}
+            className="inline-flex items-center justify-center p-2 bg-blue-500 hover:bg-blue-700 text-white rounded-full"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M15 19l-7-7 7-7"
+              ></path>
+            </svg>
+            <span className="mr-2">Back</span>
+          </button>
+          <h2 className="text-3xl font-bold text-gray-800 text-center w-full">
+            Your Capsules Are Buried Here!!
+          </h2>
+          <div></div>
+        </div>
+        <ul className="space-y-4">
+          {capsules.map((capsule) => (
+            <li
+              key={capsule.id}
+              className="border p-4 rounded-md shadow-sm bg-white hover:shadow-md transition-shadow"
+            >
+              <h3 className="text-xl font-semibold text-gray-900">
+                {capsule.title}
+              </h3>
+              <p className="text-gray-600">{capsule.date}</p>
+              {unlockedCapsules.includes(capsule.id) ? (
+                <p className="mt-2 text-gray-800">{capsule.message}</p>
+              ) : (
+                <button
+                  onClick={() => handleUnlock(capsule.id)}
+                  className="mt-2 bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded"
+                >
+                  Unlock Now
+                </button>
+              )}
+              <button
+                onClick={() => handleRemove(capsule.id)}
+                className="mt-2 ml-4 bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+      {showModal && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-black p-6 rounded-lg flex flex-col items-center shadow-xl">
+            <svg
+              className="h-12 w-12 text-red-500 mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+            <h3 className="text-white text-xl font-bold">
+              No capsules available!
+            </h3>
+            <div className="animate-spin mt-3">
+              <svg
+                className="w-6 h-6 text-blue-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 0v4m0-4h4m-4 0H8"
+                />
+              </svg>
+            </div>
+            <p className="text-white mt-3">Redirecting to home...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -18,7 +18,7 @@ interface FormValues {
 const CreateCapsuleForm: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [submitted, setSubmitted] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const validationSchema = Yup.object({
     title: Yup.string().required("Title is required"),
@@ -44,10 +44,10 @@ const CreateCapsuleForm: React.FC = () => {
     try {
       await addDoc(collection(db, "users", user.uid, "capsules"), newCapsule);
       dispatch(addCapsule({ id: user.uid, ...newCapsule }));
-      setSubmitted(true);
+      setShowModal(true);
       setTimeout(() => {
         navigate("/");
-      }, 3000); // Redirect after 3 seconds
+      }); // Redirect after 3 seconds
     } catch (error) {
       console.error("Failed to create capsule:", error);
     } finally {
@@ -55,22 +55,50 @@ const CreateCapsuleForm: React.FC = () => {
     }
   };
 
-  if (submitted) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center text-2xl font-bold">
-          Capsule Created Successfully! Redirecting to home...
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-200">
-      <div className="p-10 bg-white shadow-xl rounded-xl w-full max-w-4xl">
+    <div className="flex justify-center items-center min-h-screen bg-gray-200 relative">
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-20">
+          <div className="bg-black p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <svg
+              className="w-16 h-16 text-green-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <h3 className="text-white text-xl font-bold mt-4">
+              Capsule Created Successfully!
+            </h3>
+            <p className="animate-spin mt-3">
+              <svg
+                className="w-6 h-6 text-blue-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 0v4m0-4h4m-4 0H8"
+                />
+              </svg>
+            </p>
+            <p className="text-white">Redirecting to home...</p>
+          </div>
+        </div>
+      )}
+      <div className="p-10 bg-white shadow-xl rounded-xl w-full max-w-4xl z-10">
         <button
           onClick={() => navigate("/")}
-          className="absolute top-4 left-4 text-gray-700 hover:text-gray-900"
+          className="absolute top-4 left-4 text-gray-700 hover:text-gray-900 z-0"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +117,7 @@ const CreateCapsuleForm: React.FC = () => {
           Back
         </button>
         <h2 className="text-3xl font-bold text-center mb-6">
-          Create a New Capsule
+          Create Your New Capsule!!
         </h2>
         <Formik
           initialValues={{ title: "", date: "", message: "" }}
