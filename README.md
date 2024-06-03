@@ -1,6 +1,6 @@
 This README file provides an overview of the project, installation instructions, and other relevant information.
 
-# Virtual Time Capsule
+# Time-it
 
 This project is a virtual time capsule built with React and TypeScript, using Redux for state management and Tailwind for styling. Users can create and view time capsules, which include titles, dates, and messages.
 
