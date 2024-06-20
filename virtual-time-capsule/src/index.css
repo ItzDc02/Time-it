@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* src/index.css */
+@import "./assets/desktop-background.svg";
+@import "./assets/mobile-background.svg";
+
+.bg-desktop-background {
+  background-image: url("./assets/desktop-background.svg");
+}
+
+.bg-mobile-background {
+  background-image: url("./assets/mobile-background.svg");
+}
