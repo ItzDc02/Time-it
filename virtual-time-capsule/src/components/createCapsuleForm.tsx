@@ -35,7 +35,6 @@ const CreateCapsuleForm: React.FC = () => {
     const auth = getAuth();
     const user = auth.currentUser;
     if (!user) {
-      console.error("No user logged in");
       setSubmitting(false);
       return;
     }
@@ -47,14 +46,13 @@ const CreateCapsuleForm: React.FC = () => {
       setShowModal(true);
       setTimeout(() => navigate("/"), 3000); // Redirect after 3 seconds
     } catch (error) {
-      console.error("Failed to create capsule:", error);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center relative font-mono bg-desktop-background sm:bg-mobile-background">
+    <div className="min-h-screen flex justify-center items-center relative font-mono bg-desktop-background sm:bg-mobile-background bg-cover bg-no-repeat">
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-20">
           <div className="bg-black p-6 rounded-lg shadow-lg flex flex-col items-center">
@@ -96,7 +94,7 @@ const CreateCapsuleForm: React.FC = () => {
       <div className="p-10 bg-white shadow-xl rounded-xl w-full max-w-4xl z-10">
         <button
           onClick={() => navigate("/")}
-          className="absolute top-4 left-4 text-gray-700 hover:text-gray-900 z-50"
+          className="absolute top-4 left-4 text-yellow-400 hover:text-white z-50"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

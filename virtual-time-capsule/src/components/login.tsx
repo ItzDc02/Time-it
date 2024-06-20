@@ -24,10 +24,7 @@ const Login: React.FC = () => {
       await setDoc(userDocRef, { email: email }, { merge: true });
       // Dispatch setUser action with only the serializable parts of the user data
       dispatch(setUser({ uid, email, displayName }));
-      console.log("User signed in and document created/updated successfully");
-    } catch (error) {
-      console.error("Error during sign-in:", error);
-    }
+    } catch (error) {}
   };
 
   React.useEffect(() => {

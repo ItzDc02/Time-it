@@ -12,10 +12,7 @@ const Home = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      console.log("User signed out successfully");
-    } catch (error) {
-      console.error("Error during sign-out:", error);
-    }
+    } catch (error) {}
   };
 
   const toggleMenu = () => {

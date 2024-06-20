@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       backgroundImage: {
-        "desktop-background": "url('./src/assets/desktop-background.svg')",
-        "mobile-background": "url('./src/assets/mobile-background.svg')",
+        "desktop-background": "url('/src/assets/desktop-background.png')",
+        "mobile-background": "url('/src/assets/mobile-background.png')",
       },
     },
     plugins: [],

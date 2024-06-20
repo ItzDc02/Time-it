@@ -21,17 +21,14 @@ export const fetchCapsules = createAsyncThunk(
   "capsule/fetchCapsules",
   async (userUid: string) => {
     if (!userUid) {
-      console.log("fetchCapsules: No user UID provided");
       return [];
     }
 
-    console.log("Fetching capsules for user:", userUid);
     const querySnapshot = await getDocs(
       collection(db, "users", userUid, "capsules")
     );
     const capsules = querySnapshot.docs.map((doc) => {
       const data = doc.data();
-      console.log("Capsule data:", data);
       return {
         id: doc.id,
         title: data.title || "Default Title",
@@ -62,7 +59,6 @@ const capsuleSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchCapsules.fulfilled, (state, action) => {
-      console.log("Capsules fetched and setting state", action.payload);
       state.capsules = action.payload;
     });
   },

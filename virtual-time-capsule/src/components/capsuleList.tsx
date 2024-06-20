@@ -18,7 +18,7 @@ const CapsuleList: React.FC = () => {
     if (userUid) {
       dispatch(fetchCapsules(userUid));
     } else {
-      console.log("No user logged in");
+      ("No user logged in");
     }
   }, [dispatch, userUid]);
 
@@ -35,15 +35,12 @@ const CapsuleList: React.FC = () => {
 
   const handleRemove = async (id: string) => {
     if (!userUid) {
-      console.error("User not authenticated");
       return;
     }
     try {
       await deleteDoc(doc(db, "users", userUid, "capsules", id));
       dispatch(removeCapsule(id));
-    } catch (error) {
-      console.error("Failed to delete capsule:", error);
-    }
+    } catch (error) {}
   };
 
   const handleUnlock = (id: string) => {
