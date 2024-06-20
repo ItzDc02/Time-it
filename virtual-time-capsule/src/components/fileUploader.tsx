@@ -2,7 +2,7 @@ import { useDropzone } from "react-dropzone";
 
 const FileUploader = () => {
   const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => {},
+    onDrop: (_acceptedFiles) => {},
   });
 
   return (

@@ -17,8 +17,6 @@ const CapsuleList: React.FC = () => {
   useEffect(() => {
     if (userUid) {
       dispatch(fetchCapsules(userUid));
-    } else {
-      ("No user logged in");
     }
   }, [dispatch, userUid]);
 
