@@ -45,9 +45,7 @@ const CreateCapsuleForm: React.FC = () => {
       await addDoc(collection(db, "users", user.uid, "capsules"), newCapsule);
       dispatch(addCapsule({ id: user.uid, ...newCapsule }));
       setShowModal(true);
-      setTimeout(() => {
-        navigate("/");
-      }); // Redirect after 3 seconds
+      setTimeout(() => navigate("/"), 3000); // Redirect after 3 seconds
     } catch (error) {
       console.error("Failed to create capsule:", error);
     } finally {
@@ -56,7 +54,7 @@ const CreateCapsuleForm: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-200 relative">
+    <div className="bg-desktop-background sm:bg-mobile-background min-h-screen flex justify-center items-center relative font-mono">
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-20">
           <div className="bg-black p-6 rounded-lg shadow-lg flex flex-col items-center">
@@ -98,7 +96,7 @@ const CreateCapsuleForm: React.FC = () => {
       <div className="p-10 bg-white shadow-xl rounded-xl w-full max-w-4xl z-10">
         <button
           onClick={() => navigate("/")}
-          className="absolute top-4 left-4 text-gray-700 hover:text-gray-900 z-0"
+          className="absolute top-4 left-4 text-gray-700 hover:text-gray-900 z-50"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

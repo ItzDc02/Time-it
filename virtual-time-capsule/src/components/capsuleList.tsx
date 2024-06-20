@@ -51,7 +51,7 @@ const CapsuleList: React.FC = () => {
   };
 
   return (
-    <div className="relative p-6 bg-gradient-to-r from-blue-100 to-purple-100 min-h-screen flex flex-col items-center">
+    <div className="relative p-6 bg-gradient-to-r from-blue-100 to-purple-100 min-h-screen flex flex-col items-center font-mono">
       <div className="w-full max-w-3xl">
         <div className="flex items-center justify-between mb-6">
           <button
