@@ -8,7 +8,6 @@ import { db } from "../firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { addDays } from "date-fns";
 import { getAuth } from "firebase/auth";
-import desktopBackground from "./src/assets/desktop-background.svg";
 
 interface FormValues {
   title: string;
@@ -55,12 +54,7 @@ const CreateCapsuleForm: React.FC = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex justify-center items-center relative font-mono bg-desktop-background sm:bg-mobile-background"
-      style={{
-        backgroundImage: `url(${desktopBackground})`,
-      }}
-    >
+    <div className="min-h-screen flex justify-center items-center relative font-mono bg-desktop-background sm:bg-mobile-background">
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-20">
           <div className="bg-black p-6 rounded-lg shadow-lg flex flex-col items-center">
