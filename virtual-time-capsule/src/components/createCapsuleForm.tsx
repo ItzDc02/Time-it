@@ -1,32 +1,54 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
+import { Formik, Form, Field, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { addCapsule } from "../Features/Capsule/capsuleSlice";
 import { useNavigate } from "react-router-dom";
-import { db } from "../firebaseConfig";
-import { collection, addDoc } from "firebase/firestore";
-import { addDays } from "date-fns";
+import {
+  db,
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "../firebaseConfig";
+import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import FileUploader from "./fileUploader";
+import TooltipError from "./ErrorTooltip";
+import { addDays, startOfDay } from "date-fns";
+
+interface ExtendedFile {
+  name: string;
+  // Add other properties that you use from the file objects
+}
 
 interface FormValues {
   title: string;
   date: string;
   message: string;
+  fileUrls?: string[]; // This will store the URLs post-upload
 }
 
 const CreateCapsuleForm: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [files, setFiles] = useState<ExtendedFile[]>([]); // Use the ExtendedFile type
+
+  const tomorrow = startOfDay(addDays(new Date(), 1));
+  const minDate = tomorrow.toISOString().split("T")[0];
 
   const validationSchema = Yup.object({
     title: Yup.string().required("Title is required"),
     date: Yup.date()
       .required("Date is required")
-      .min(addDays(new Date(), 1), "Date cannot be today or in the past"),
+      .min(tomorrow, "Date cannot be today or in the past"),
     message: Yup.string().required("Message is required"),
   });
+
+  const handleFilesSelected = (selectedFiles: ExtendedFile[]) => {
+    setFiles(selectedFiles);
+  };
 
   const handleSubmit = async (
     values: FormValues,
@@ -39,13 +61,28 @@ const CreateCapsuleForm: React.FC = () => {
       return;
     }
 
-    const newCapsule = { ...values };
     try {
+      const storage = getStorage();
+      const capsuleId = new Date().getTime().toString();
+      const fileUrls = await Promise.all(
+        files.map((file) => {
+          const fileRef = ref(
+            storage,
+            `capsules/${user.uid}/${capsuleId}/${file.name}`
+          );
+          return uploadBytes(fileRef, file as unknown as Blob).then(() =>
+            getDownloadURL(fileRef)
+          );
+        })
+      );
+
+      const newCapsule = { ...values, fileUrls, createdAt: Timestamp.now() };
       await addDoc(collection(db, "users", user.uid, "capsules"), newCapsule);
-      dispatch(addCapsule({ id: user.uid, ...newCapsule }));
+      dispatch(addCapsule({ id: capsuleId, ...newCapsule }));
       setShowModal(true);
-      setTimeout(() => navigate("/"), 3000); // Redirect after 3 seconds
+      setTimeout(() => navigate("/"), 3000);
     } catch (error) {
+      console.error("Failed to upload files:", error);
     } finally {
       setSubmitting(false);
     }
@@ -91,7 +128,7 @@ const CreateCapsuleForm: React.FC = () => {
           </div>
         </div>
       )}
-      <div className="p-10 bg-white shadow-xl rounded-xl w-full max-w-4xl z-10">
+      <div className="p-4 bg-white rounded-xl w-full max-w-3xl z-10">
         <button
           onClick={() => navigate("/")}
           className="absolute top-4 left-4 text-yellow-400 hover:text-white z-50"
@@ -112,7 +149,7 @@ const CreateCapsuleForm: React.FC = () => {
           </svg>
           Back
         </button>
-        <h2 className="text-3xl font-bold text-center mb-6">
+        <h2 className="text-3xl font-bold text-center mb-4">
           Create a New Memory ♥
         </h2>
         <Formik
@@ -121,69 +158,76 @@ const CreateCapsuleForm: React.FC = () => {
           onSubmit={handleSubmit}
         >
           {({ isSubmitting }) => (
-            <Form className="space-y-4">
-              <div>
+            <Form className="space-y-3">
+              <div className="relative">
                 <label
                   htmlFor="title"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-base font-medium text-gray-700"
                 >
                   Title
                 </label>
-                <Field
-                  type="text"
-                  name="title"
-                  placeholder="Enter the title"
-                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                <ErrorMessage
-                  name="title"
-                  component="div"
-                  className="text-red-500 text-sm"
-                />
+                <div className="flex items-center relative">
+                  <Field
+                    type="text"
+                    name="title"
+                    placeholder="Enter the title"
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <TooltipError
+                    name="title"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  />
+                </div>
               </div>
-              <div>
+              <div className="relative">
                 <label
                   htmlFor="date"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-base font-medium text-gray-700"
                 >
                   Date
                 </label>
-                <Field
-                  type="date"
-                  name="date"
-                  placeholder="Select a date"
-                  min={addDays(new Date(), 1).toISOString().split("T")[0]}
-                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                <ErrorMessage
-                  name="date"
-                  component="div"
-                  className="text-red-500 text-sm"
-                />
+                <div className="flex items-center relative">
+                  <Field
+                    type="date"
+                    name="date"
+                    placeholder="Select a date"
+                    min={minDate}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <TooltipError
+                    name="date"
+                    className="absolute right-8 top-1/2 transform -translate-y-1/2"
+                  />
+                </div>
               </div>
-              <div>
+              <div className="relative">
                 <label
                   htmlFor="message"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-base font-medium text-gray-700"
                 >
                   Message
                 </label>
-                <Field
-                  as="textarea"
-                  name="message"
-                  placeholder="Write your message"
-                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                <ErrorMessage
-                  name="message"
-                  component="div"
-                  className="text-red-500 text-sm"
-                />
+                <div className="flex items-center relative">
+                  <Field
+                    as="textarea"
+                    name="message"
+                    placeholder="Write your message"
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                    style={{ height: "100px", paddingRight: "2.5rem" }} // Increased right padding to accommodate the icon
+                  />
+                  <TooltipError
+                    name="message"
+                    className="absolute right-2 bottom-2"
+                  />
+                </div>
+              </div>
+              <div>
+                <FileUploader onFilesSelected={handleFilesSelected} />
               </div>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline"
+                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
                 Create Capsule
               </button>

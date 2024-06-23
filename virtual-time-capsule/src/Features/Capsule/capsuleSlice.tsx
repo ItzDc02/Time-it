@@ -7,6 +7,7 @@ export interface Capsule {
   title: string;
   date: string;
   message: string;
+  fileUrls?: string[];
 }
 
 interface CapsuleState {
@@ -34,6 +35,7 @@ export const fetchCapsules = createAsyncThunk(
         title: data.title || "Default Title",
         date: data.date || "No Date",
         message: data.message || "No Message",
+        fileUrls: data.fileUrls || [], // Ensure this is correctly handled
       };
     });
 

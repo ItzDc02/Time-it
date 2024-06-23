@@ -4,7 +4,8 @@ import { AppDispatch, RootState } from "../Store/store";
 import { fetchCapsules, removeCapsule } from "../Features/Capsule/capsuleSlice";
 import { useNavigate } from "react-router-dom";
 import { deleteDoc, doc } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { db, getStorage, ref, deleteObject } from "../firebaseConfig";
+import FileModal from "./FileModal";
 
 const CapsuleList: React.FC = () => {
   const capsules = useSelector((state: RootState) => state.capsule.capsules);
@@ -13,6 +14,8 @@ const CapsuleList: React.FC = () => {
   const navigate = useNavigate();
   const [unlockedCapsules, setUnlockedCapsules] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [showRedirectModal, setShowRedirectModal] = useState(false);
 
   useEffect(() => {
     if (userUid) {
@@ -22,27 +25,51 @@ const CapsuleList: React.FC = () => {
 
   useEffect(() => {
     if (capsules.length === 0) {
-      setShowModal(true);
+      setShowRedirectModal(true);
       const timeout = setTimeout(() => {
-        setShowModal(false);
+        setShowRedirectModal(false);
         navigate("/");
       }, 3000);
       return () => clearTimeout(timeout);
     }
   }, [capsules, navigate]);
 
-  const handleRemove = async (id: string) => {
+  const handleRemove = async (id: string, fileUrls: string[] = []) => {
     if (!userUid) {
       return;
     }
+
+    const docRef = doc(db, "users", userUid, "capsules", id);
+    const storage = getStorage();
+
     try {
-      await deleteDoc(doc(db, "users", userUid, "capsules", id));
+      // Delete each file associated with the capsule
+      await Promise.all(
+        fileUrls.map(async (fileUrl) => {
+          const correctedPath = fileUrl.replace(
+            "gs://virtual-time-capsule-3d012.appspot.com/",
+            ""
+          );
+          const fileRef = ref(storage, correctedPath);
+          await deleteObject(fileRef);
+        })
+      );
+
+      // Delete the document from Firestore
+      await deleteDoc(docRef);
       dispatch(removeCapsule(id));
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error removing capsule or file:", error);
+    }
   };
 
   const handleUnlock = (id: string) => {
     setUnlockedCapsules((prev) => [...prev, id]);
+  };
+
+  const handleViewFiles = (fileUrls: string[]) => {
+    setSelectedFiles(fileUrls);
+    setShowModal(true);
   };
 
   return (
@@ -94,17 +121,33 @@ const CapsuleList: React.FC = () => {
                   Unlock Now
                 </button>
               )}
-              <button
-                onClick={() => handleRemove(capsule.id)}
-                className="mt-2 ml-4 bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded"
-              >
-                Remove
-              </button>
+              <div className="flex mt-2 space-x-2">
+                <button
+                  onClick={() =>
+                    handleRemove(capsule.id, capsule.fileUrls || [])
+                  }
+                  className="bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded"
+                >
+                  Remove
+                </button>
+                <button
+                  onClick={() => handleViewFiles(capsule.fileUrls || [])}
+                  className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
+                >
+                  View Memories
+                </button>
+              </div>
             </li>
           ))}
         </ul>
       </div>
-      {showModal && (
+      {showModal && selectedFiles.length > 0 && (
+        <FileModal
+          fileUrls={selectedFiles}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+      {showRedirectModal && (
         <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-black p-6 rounded-lg flex flex-col items-center shadow-xl">
             <svg
@@ -117,7 +160,7 @@ const CapsuleList: React.FC = () => {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2"
+                strokeWidth={2}
                 d="M6 18L18 6M6 6l12 12"
               ></path>
             </svg>
