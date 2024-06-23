@@ -13,6 +13,9 @@ This project is a virtual time capsule built with React and TypeScript, using Re
 - **Date Handling:** date-fns is used for manipulating and formatting dates.
 - **Tailwind Styling:** Tailwind is used for styling components.
 - **User Authentication and Database Storage:** FireBase is being used for User Auth and The Data is being stored in Firestore
+- **File Upload:** Users can upload files to be stored within their time capsules.
+- **File Download and Viewing:** Users can download files stored in their time capsules as a ZIP archive and also can click on the links to view them before downloading.
+
 
 ## Getting Started
 
@@ -21,10 +24,11 @@ This project is a virtual time capsule built with React and TypeScript, using Re
 - Node.js (>= 12.x)
 - npm (>= 6.x) or yarn (>= 1.22.x)
 
-## Tasks Done (Tasks to be Added as they are Completed)
+## Tasks Done (Tasks to be Added as they are Completed) Project Completion 90%
 - Basic Layout and Functionality on Local ✅
 - Tailwind and Capsules Persist After Reload ✅
 - Homepage Redesign and Firebase Integration with Authentication and Storage ✅
+- File Upload is Possible Now ✅
 
 ### Installation
 
