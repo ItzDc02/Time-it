@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useDropzone } from "react-dropzone";
-import React, { useState, MouseEvent } from "react";
+import React, { useState } from "react";
 
 interface ExtendedFile extends File {
   preview: string;
@@ -33,12 +33,10 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelected }) => {
     });
 
   const removeFile = (fileToRemove: ExtendedFile) => {
-    return (event: MouseEvent<HTMLButtonElement>) => {
-      const updatedFiles = files.filter((file) => file !== fileToRemove);
-      setFiles(updatedFiles);
-      onFilesSelected(updatedFiles);
-      URL.revokeObjectURL(fileToRemove.preview);
-    };
+    const updatedFiles = files.filter((file) => file !== fileToRemove);
+    setFiles(updatedFiles);
+    onFilesSelected(updatedFiles);
+    URL.revokeObjectURL(fileToRemove.preview);
   };
 
   return (
@@ -92,7 +90,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelected }) => {
               alt={file.name}
             />
             <button
-              onClick={removeFile(file)}
+              onClick={() => removeFile(file)}
               className="absolute top-0 right-0 mt-1 mr-1 text-red-600 bg-white rounded-full p-1 hover:bg-red-600 hover:text-white"
             >
               &times;
