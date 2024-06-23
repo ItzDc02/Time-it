@@ -16,6 +16,7 @@ const CapsuleList: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [showRedirectModal, setShowRedirectModal] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (userUid) {
@@ -43,7 +44,6 @@ const CapsuleList: React.FC = () => {
     const storage = getStorage();
 
     try {
-      // Delete each file associated with the capsule
       await Promise.all(
         fileUrls.map(async (fileUrl) => {
           const correctedPath = fileUrl.replace(
@@ -55,7 +55,6 @@ const CapsuleList: React.FC = () => {
         })
       );
 
-      // Delete the document from Firestore
       await deleteDoc(docRef);
       dispatch(removeCapsule(id));
     } catch (error) {
@@ -63,13 +62,19 @@ const CapsuleList: React.FC = () => {
     }
   };
 
-  const handleUnlock = (id: string) => {
+  const handleUnlock = (id: string, message: string) => {
     setUnlockedCapsules((prev) => [...prev, id]);
+    setCurrentMessage(message);
   };
 
   const handleViewFiles = (fileUrls: string[]) => {
     setSelectedFiles(fileUrls);
     setShowModal(true);
+  };
+
+  const handleCloseMessage = () => {
+    setCurrentMessage(null);
+    setUnlockedCapsules([]); // Resetting unlocked capsules when the message modal is closed
   };
 
   return (
@@ -105,38 +110,43 @@ const CapsuleList: React.FC = () => {
           {capsules.map((capsule) => (
             <li
               key={capsule.id}
-              className="border p-4 rounded-md shadow-sm bg-white hover:shadow-md transition-shadow"
+              className="relative border p-4 rounded-md shadow-sm bg-white hover:shadow-md transition-shadow"
             >
               <h3 className="text-xl font-semibold text-gray-900">
                 {capsule.title}
               </h3>
               <p className="text-gray-600">{capsule.date}</p>
-              {unlockedCapsules.includes(capsule.id) ? (
-                <p className="mt-2 text-gray-800">{capsule.message}</p>
-              ) : (
-                <button
-                  onClick={() => handleUnlock(capsule.id)}
-                  className="mt-2 bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded"
-                >
-                  Unlock Now
-                </button>
-              )}
-              <div className="flex mt-2 space-x-2">
-                <button
-                  onClick={() =>
-                    handleRemove(capsule.id, capsule.fileUrls || [])
-                  }
-                  className="bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded"
-                >
-                  Remove
-                </button>
+              <div className="flex justify-between mt-2">
                 <button
                   onClick={() => handleViewFiles(capsule.fileUrls || [])}
                   className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
                 >
                   View Memories
                 </button>
+                {!unlockedCapsules.includes(capsule.id) && (
+                  <button
+                    onClick={() => handleUnlock(capsule.id, capsule.message)}
+                    className="bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded"
+                  >
+                    Unlock Now
+                  </button>
+                )}
               </div>
+              <svg
+                onClick={() => handleRemove(capsule.id, capsule.fileUrls || [])}
+                className="h-6 w-6 text-red-500 hover:text-red-700 absolute top-2 right-2 cursor-pointer"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
             </li>
           ))}
         </ul>
@@ -146,6 +156,33 @@ const CapsuleList: React.FC = () => {
           fileUrls={selectedFiles}
           onClose={() => setShowModal(false)}
         />
+      )}
+      {currentMessage && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="relative bg-black p-6 rounded-lg shadow-lg">
+            <div className="flex flex-row-reverse justify-between items-center mb-4">
+              <svg
+                onClick={handleCloseMessage}
+                className="h-6 w-6 text-red-500 hover:text-red-700 cursor-pointer"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </div>
+            <h3 className="text-white text-xl font-semibold mb-4">
+              Your Secrets Are Here 🧙‍♂️
+            </h3>
+            <p className="text-white mb-4">{currentMessage}</p>
+          </div>
+        </div>
       )}
       {showRedirectModal && (
         <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">

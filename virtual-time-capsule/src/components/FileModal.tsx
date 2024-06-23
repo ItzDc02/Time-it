@@ -110,7 +110,7 @@ const FileModal: React.FC<FileModalProps> = ({ fileUrls, onClose }) => {
           </button>
           <button
             onClick={onClose}
-            className="bg-gray-500 hover:bg-gray-700 text-white py-2 px-4 rounded"
+            className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded"
           >
             Close
           </button>
