@@ -8,6 +8,8 @@ export interface Capsule {
   date: string;
   message: string;
   fileUrls?: string[];
+  ownerEmail?: string;
+  ownerUid?: string;
 }
 
 interface CapsuleState {
@@ -36,6 +38,8 @@ export const fetchCapsules = createAsyncThunk(
         date: data.date || "No Date",
         message: data.message || "No Message",
         fileUrls: data.fileUrls || [], // Ensure this is correctly handled
+        ownerEmail: data.ownerEmail,
+        ownerUid: userUid, // Ensure ownerUid is set
       };
     });
 

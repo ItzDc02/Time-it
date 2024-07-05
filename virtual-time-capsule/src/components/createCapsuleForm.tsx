@@ -19,7 +19,6 @@ import { addDays, startOfDay } from "date-fns";
 
 interface ExtendedFile {
   name: string;
-  // Add other properties that you use from the file objects
 }
 
 interface FormValues {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../Store/store";
 import { fetchCapsules, removeCapsule } from "../Features/Capsule/capsuleSlice";
@@ -6,26 +6,33 @@ import { useNavigate } from "react-router-dom";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db, getStorage, ref, deleteObject } from "../firebaseConfig";
 import FileModal from "./FileModal";
+import { ToastContainer, toast, Flip } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import CustomIcon from "../assets/CustomIcon";
+import TransferOwnershipModal from "./TransferOwnerShipModal";
 
 const CapsuleList: React.FC = () => {
   const capsules = useSelector((state: RootState) => state.capsule.capsules);
   const userUid = useSelector((state: RootState) => state.user.uid);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+
   const [unlockedCapsules, setUnlockedCapsules] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [showRedirectModal, setShowRedirectModal] = useState(false);
   const [currentMessage, setCurrentMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showTransferModal, setShowTransferModal] = useState(false);
 
   useEffect(() => {
     if (userUid) {
-      dispatch(fetchCapsules(userUid));
+      dispatch(fetchCapsules(userUid)).finally(() => setIsLoading(false));
     }
   }, [dispatch, userUid]);
 
   useEffect(() => {
-    if (capsules.length === 0) {
+    if (!isLoading && capsules.length === 0) {
       setShowRedirectModal(true);
       const timeout = setTimeout(() => {
         setShowRedirectModal(false);
@@ -33,49 +40,67 @@ const CapsuleList: React.FC = () => {
       }, 3000);
       return () => clearTimeout(timeout);
     }
-  }, [capsules, navigate]);
+  }, [capsules, navigate, isLoading]);
 
-  const handleRemove = async (id: string, fileUrls: string[] = []) => {
-    if (!userUid) {
-      return;
-    }
-
-    const docRef = doc(db, "users", userUid, "capsules", id);
-    const storage = getStorage();
-
-    try {
-      await Promise.all(
-        fileUrls.map(async (fileUrl) => {
-          const correctedPath = fileUrl.replace(
-            "gs://virtual-time-capsule-3d012.appspot.com/",
-            ""
+  const handleRemove = useCallback(
+    async (id: string, fileUrls: string[] = []) => {
+      if (!userUid) {
+        return;
+      }
+      const docRef = doc(db, "users", userUid, "capsules", id);
+      const storage = getStorage();
+      try {
+        if (fileUrls.length > 0) {
+          await Promise.all(
+            fileUrls.map(async (fileUrl) => {
+              if (fileUrl) {
+                const correctedPath = fileUrl.replace("gs://", "");
+                const fileRef = ref(storage, correctedPath);
+                await deleteObject(fileRef);
+              }
+            })
           );
-          const fileRef = ref(storage, correctedPath);
-          await deleteObject(fileRef);
-        })
-      );
+        }
+        await deleteDoc(docRef);
+        dispatch(removeCapsule(id));
+        toast.success("Capsule removed successfully");
+      } catch (error) {
+        console.error("Error removing capsule or file:", error);
+        toast.error("Failed to remove capsule");
+      }
+    },
+    [userUid, dispatch]
+  );
 
-      await deleteDoc(docRef);
-      dispatch(removeCapsule(id));
-    } catch (error) {
-      console.error("Error removing capsule or file:", error);
-    }
-  };
-
-  const handleUnlock = (id: string, message: string) => {
+  const handleUnlock = useCallback((id: string, message: string) => {
     setUnlockedCapsules((prev) => [...prev, id]);
     setCurrentMessage(message);
-  };
+  }, []);
 
-  const handleViewFiles = (fileUrls: string[]) => {
+  const handleViewFiles = useCallback((fileUrls: string[]) => {
+    if (fileUrls.length === 0) {
+      toast.info("No Memories here! Time to create some 🎉", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Flip,
+        icon: <CustomIcon />,
+      });
+      return;
+    }
     setSelectedFiles(fileUrls);
     setShowModal(true);
-  };
+  }, []);
 
-  const handleCloseMessage = () => {
+  const handleCloseMessage = useCallback(() => {
     setCurrentMessage(null);
-    setUnlockedCapsules([]); // Resetting unlocked capsules when the message modal is closed
-  };
+    setUnlockedCapsules([]);
+  }, []);
 
   return (
     <div className="relative p-6 bg-gradient-to-r from-blue-100 to-purple-100 min-h-screen flex flex-col items-center font-mono">
@@ -104,7 +129,12 @@ const CapsuleList: React.FC = () => {
           <h2 className="text-3xl font-bold text-gray-800 text-center w-full">
             Your Memories rest here ♥
           </h2>
-          <div></div>
+          <button
+            onClick={() => setShowTransferModal(true)}
+            className="bg-yellow-500 hover:bg-yellow-700 text-white py-1 px-3 rounded"
+          >
+            Transfer Ownership
+          </button>
         </div>
         <ul className="space-y-4">
           {capsules.map((capsule) => (
@@ -158,7 +188,7 @@ const CapsuleList: React.FC = () => {
         />
       )}
       {currentMessage && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="relative bg-black p-6 rounded-lg shadow-lg">
             <div className="flex flex-row-reverse justify-between items-center mb-4">
               <svg
@@ -185,7 +215,7 @@ const CapsuleList: React.FC = () => {
         </div>
       )}
       {showRedirectModal && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-black p-6 rounded-lg flex flex-col items-center shadow-xl">
             <svg
               className="h-12 w-12 text-red-500 mb-4"
@@ -223,6 +253,13 @@ const CapsuleList: React.FC = () => {
           </div>
         </div>
       )}
+      {showTransferModal && userUid && (
+        <TransferOwnershipModal
+          userUid={userUid}
+          onClose={() => setShowTransferModal(false)}
+        />
+      )}
+      <ToastContainer />
     </div>
   );
 };

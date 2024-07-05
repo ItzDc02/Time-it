@@ -2,25 +2,18 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import rockyBeach from "../assets/rockybeach.webp";
 import { motion } from "framer-motion";
-import { getAuth, signOut } from "firebase/auth";
 import logo from "../assets/logo.svg";
+import Logout from "./logout";
 
 const Home = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const auth = getAuth();
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {}
-  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white font-mono">
+    <div className="flex flex-col min-h-screen font-mono">
       <header className="fixed top-0 left-0 w-full z-50 text-white px-4 sm:px-6 lg:px-8 py-3 ">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center">
@@ -37,13 +30,7 @@ const Home = () => {
             <Link className="text-lg hover:underline" to="/view">
               Capsule List
             </Link>
-            <Link
-              className="text-lg hover:underline"
-              to=""
-              onClick={handleLogout}
-            >
-              Logout
-            </Link>
+            <Logout />
           </nav>
           <button
             onClick={toggleMenu}

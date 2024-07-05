@@ -7,15 +7,11 @@ const Logout: React.FC = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // User is signed out
     } catch (error) {}
   };
 
   return (
-    <button
-      onClick={handleLogout}
-      className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
-    >
+    <button onClick={handleLogout} className="text-lg hover:underline">
       Logout
     </button>
   );

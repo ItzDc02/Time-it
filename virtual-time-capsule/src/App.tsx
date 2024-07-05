@@ -2,7 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./components/home";
 import CreateCapsuleForm from "./components/createCapsuleForm";
 import CapsuleList from "./components/capsuleList";
+import About from "./components/About";
 import Login from "./components/login";
+import AdminPanel from "./components/AdminPanel";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -16,13 +18,13 @@ const App = () => {
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // Only pass the serializable parts of the user object
-        const userData = {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-        };
-        dispatch(setUser(userData));
+        dispatch(
+          setUser({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+          })
+        );
       } else {
         dispatch(clearUser());
       }
@@ -32,12 +34,17 @@ const App = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/login" element={<Login />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Home />} />
           <Route path="/create" element={<CreateCapsuleForm />} />
           <Route path="/view" element={<CapsuleList />} />
+          <Route path="/about" element={<About />} />
         </Route>
-        <Route path="/login" element={<Login />} />
+        <Route element={<ProtectedRoute adminOnly={true} />}>
+          <Route path="/admin" element={<AdminPanel />} />
+        </Route>
+        <Route path="*" element={<h1>404 Not Found</h1>} />
       </Routes>
     </Router>
   );
