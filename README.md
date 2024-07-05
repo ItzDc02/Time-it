@@ -24,11 +24,12 @@ This project is a virtual time capsule built with React and TypeScript, using Re
 - Node.js (>= 12.x)
 - npm (>= 6.x) or yarn (>= 1.22.x)
 
-## Tasks Done (Tasks to be Added as they are Completed) Project Completion 90%
+## Tasks Done (Tasks to be Added as they are Completed) Project Completion 100%
 - Basic Layout and Functionality on Local ✅
 - Tailwind and Capsules Persist After Reload ✅
 - Homepage Redesign and Firebase Integration with Authentication and Storage ✅
 - File Upload is Possible Now ✅
+- Transfering OwnerShip Has been Implemeneted. Requests are Approved by admin ✅
 
 ### Installation
 
