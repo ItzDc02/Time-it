@@ -25,7 +25,7 @@ const AdminPanel: React.FC = () => {
     (TransferRequest & { id: string })[]
   >([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [user] = useAuthState(auth);
 
