@@ -32,7 +32,7 @@ Time-it is a virtual time capsule application built with React and TypeScript, u
 1. Clone the repository:
     ```bash
     git clone https://github.com/your-username/time-it.git
-    cd time-it
+    cd virtual-time-capsule
     ```
 2. Install dependencies:
     ```bash
